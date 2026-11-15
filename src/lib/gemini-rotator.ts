@@ -152,137 +152,69 @@ export class PlantScanVisionEngine {
     mimeType: string,
     prompt: string
   ): Promise<{ text: string }> {
-    let preferredModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    // Sanitize any deprecated gemini-2.0 or 1.5 model references
-    if (
-      preferredModel.includes("2.0") ||
-      preferredModel.includes("1.5")
-    ) {
-      preferredModel = "gemini-3.8-flash";
-    }
-
-    const candidateModels = [
-      preferredModel,
-      "gemini-3.8-flash",
-      "gemini-2.5-flash",
-    ];
-
-    // Filter out duplicates and any retired models
-    const uniqueModels = Array.from(new Set(candidateModels)).filter(
-      (m) => !m.includes("2.0") && !m.includes("1.5")
-    );
+    // Strictly target gemini-3.8-flash (Google's official active Flash vision model)
+    const model = "gemini-3.8-flash";
 
     let safeMimeType = mimeType || "image/jpeg";
     if (safeMimeType.includes("svg")) {
       safeMimeType = "image/jpeg";
     }
 
-    let lastHttpError: any = null;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    for (const model of uniqueModels) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-
-      const payload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              {
-                text: prompt,
+    const payload = {
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              text: prompt,
+            },
+            {
+              inline_data: {
+                mime_type: safeMimeType,
+                data: imageBase64,
               },
-              {
-                inline_data: {
-                  mime_type: safeMimeType,
-                  data: imageBase64,
-                },
-              },
-            ],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          topP: 0.95,
-          maxOutputTokens: 1600,
-          thinkingConfig: {
-            thinkingLevel: "LOW",
-          },
+            },
+          ],
         },
-      };
+      ],
+      generationConfig: {
+        temperature: 0.2,
+        topP: 0.95,
+        maxOutputTokens: 2048,
+      },
+    };
 
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-goog-api-key": apiKey,
-          },
-          body: JSON.stringify(payload),
-          signal: AbortSignal.timeout(8000), // 8-second abort ceiling to strictly respect Vercel limits
-        });
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
 
-        if (!res.ok) {
-          const errorJson = await res.json().catch(() => null);
-          const errorMsg =
-            errorJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
+    if (!res.ok) {
+      const errorJson = await res.json().catch(() => null);
+      const errorMsg =
+        errorJson?.error?.message || `HTTP ${res.status}: ${res.statusText}`;
 
-          const errObj: any = new Error(errorMsg);
-          errObj.status = res.status;
-          errObj.details = errorJson;
+      const errObj: any = new Error(errorMsg);
+      errObj.status = res.status;
+      errObj.details = errorJson;
 
-          // 1. Quota / Rate limit (429) -> throw so outer rotator switches to secondary key
-          if (res.status === 429 || errorMsg.includes("RESOURCE_EXHAUSTED")) {
-            throw errObj;
-          }
-
-          // 2. Authentication / Permission errors -> throw immediately, don't waste time trying other models with a bad key!
-          if (
-            res.status === 401 ||
-            res.status === 403 ||
-            errorMsg.toLowerCase().includes("api key") ||
-            errorMsg.toLowerCase().includes("permission")
-          ) {
-            throw errObj;
-          }
-
-          // 3. Payload / Image error -> throw immediately
-          if (
-            errorMsg.toLowerCase().includes("mime") ||
-            errorMsg.toLowerCase().includes("image")
-          ) {
-            throw errObj;
-          }
-
-          // 4. Model not found or deprecated on this endpoint -> try next candidate
-          const isModelNotFound =
-            res.status === 404 ||
-            errorMsg.toLowerCase().includes("not found") ||
-            errorMsg.toLowerCase().includes("no longer available") ||
-            errorMsg.toLowerCase().includes("not supported for generatecontent");
-
-          if (isModelNotFound) {
-            console.warn(`Model '${model}' not supported on this endpoint (${errorMsg}). Trying next candidate...`);
-            lastHttpError = errObj;
-            continue;
-          }
-
-          throw errObj;
-        }
-
-        const data = await res.json();
-        const candidate = data?.candidates?.[0];
-        const text = candidate?.content?.parts?.[0]?.text;
-
-        if (!text) {
-          throw new Error("No diagnostic response generated.");
-        }
-
-        return { text };
-      } catch (err: any) {
-        if (err.status === 429) throw err;
-        lastHttpError = err;
-      }
+      throw errObj;
     }
 
-    throw lastHttpError || new Error("Foliar inference failed.");
+    const data = await res.json();
+    const candidate = data?.candidates?.[0];
+    const text = candidate?.content?.parts?.[0]?.text;
+
+    if (!text) {
+      throw new Error("No diagnostic response generated by the model.");
+    }
+
+    return { text };
   }
 }
