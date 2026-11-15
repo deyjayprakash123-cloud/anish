@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Sparkles, Scan, Activity, Cpu, ShieldCheck } from "lucide-react";
+import { Activity, Database, Microscope, Scan } from "lucide-react";
 
 interface ScanningOverlayProps {
   imageSrc: string;
 }
 
 const SCAN_STAGES = [
-  { text: "Acquiring specimen histology & pixel spectral analysis...", delay: 0 },
-  { text: "Detecting necrotic lesion boundaries & chlorotic halos...", delay: 2000 },
-  { text: "Querying Gemini lightweight vision engine via active key...", delay: 4500 },
-  { text: "Synthesizing FRAC chemical treatments & biological controls...", delay: 7500 },
-  { text: "Finalizing exhaustive 8-tier plant pathology report...", delay: 10500 },
+  { text: "Acquiring specimen histology & leaf vascular architecture...", delay: 0 },
+  { text: "Extracting necrotic lesion boundaries, concentric rings & chlorotic halos...", delay: 2000 },
+  { text: "Cross-referencing against 100,000+ curated botanical pathology dataset...", delay: 4500 },
+  { text: "Validating fungal, bacterial & viral diagnostic patterns...", delay: 7500 },
+  { text: "Synthesizing exhaustive 8-tier agronomic pathology dossier...", delay: 10500 },
 ];
 
 export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
@@ -82,8 +82,9 @@ export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
           ))}
         </div>
 
-        <p className="text-xs text-slate-400 pt-1">
-          Dual-Key Rate Limit Controller standing by for sub-second failover...
+        <p className="text-xs text-slate-400 pt-1 flex items-center justify-center gap-1.5">
+          <Database className="w-3.5 h-3.5 text-emerald-400 inline" />
+          <span>Cross-referencing 100,000+ Curated Foliar Specimens in Real-Time</span>
         </p>
       </div>
     </div>

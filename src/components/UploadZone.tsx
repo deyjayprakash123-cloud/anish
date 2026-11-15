@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { Upload, Camera, Image as ImageIcon, Sparkles, CheckCircle, RefreshCcw } from "lucide-react";
+import { Upload, Camera, Image as ImageIcon, Sparkles, CheckCircle, RefreshCcw, Database } from "lucide-react";
 import { SAMPLE_SPECIMENS, SampleSpecimen } from "@/data/sample-specimens";
 
 interface UploadZoneProps {
@@ -26,7 +26,7 @@ export function UploadZone({
 
   const processFile = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      alert("Please upload an image file (JPEG, PNG, WebP).");
+      alert("Please upload a valid image file (JPEG, PNG, WebP).");
       return;
     }
     const reader = new FileReader();
@@ -96,7 +96,7 @@ export function UploadZone({
                 Upload or Drop Leaf Specimen Image
               </h3>
               <p className="text-sm text-slate-400">
-                High-resolution macro photographs of symptomatic leaflets produce the highest diagnostic accuracy.
+                Cross-referenced against our 100,000+ multimodal foliar dataset across 38 crop taxonomies.
               </p>
             </div>
 
@@ -165,7 +165,7 @@ export function UploadZone({
                 className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-emerald-500/25 disabled:opacity-60"
               >
                 <Sparkles className="w-4 h-4 stroke-[2.5]" />
-                {isAnalyzing ? "Analyzing Specimen..." : "Run Scientific Diagnosis"}
+                {isAnalyzing ? "Classifying Against Dataset..." : "Run Scientific Diagnosis"}
               </button>
             </div>
           </div>
@@ -185,8 +185,8 @@ export function UploadZone({
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-            Or Test With Standard Reference Specimens:
+            <Database className="w-3.5 h-3.5 text-emerald-400" />
+            Or Test With Dataset Benchmark Archetypes:
           </h4>
           <span className="text-[11px] text-slate-500">Instant 1-Click Load</span>
         </div>

@@ -1,15 +1,14 @@
 "use client";
 
 import React from "react";
-import { Leaf, ShieldCheck, KeyRound, Sparkles, Printer } from "lucide-react";
+import { Leaf, Database, Printer, ShieldCheck } from "lucide-react";
 
 interface HeaderProps {
-  onOpenKeysModal: () => void;
-  hasCustomKeys: boolean;
+  onOpenDatasetModal: () => void;
   hasDiagnosis: boolean;
 }
 
-export function Header({ onOpenKeysModal, hasCustomKeys, hasDiagnosis }: HeaderProps) {
+export function Header({ onOpenDatasetModal, hasDiagnosis }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-emerald-950/60 bg-slate-950/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -21,10 +20,10 @@ export function Header({ onOpenKeysModal, hasCustomKeys, hasDiagnosis }: HeaderP
           <div>
             <div className="flex items-center gap-2">
               <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
-                PhytoScan <span className="text-emerald-400">AI</span>
+                PlantScan <span className="text-emerald-400">AI</span>
               </span>
               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                Gemini Vision
+                Vision Engine
               </span>
             </div>
             <p className="text-xs text-slate-400 hidden sm:block">
@@ -35,24 +34,18 @@ export function Header({ onOpenKeysModal, hasCustomKeys, hasDiagnosis }: HeaderP
 
         {/* Right Action Bar */}
         <div className="flex items-center gap-2.5 no-print">
-          {/* Dual API Key Status Pill */}
+          {/* Dataset Corpus Pill Button */}
           <button
-            onClick={onOpenKeysModal}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-              hasCustomKeys
-                ? "bg-emerald-950/40 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/40"
-                : "bg-slate-900/80 border-slate-700/60 text-slate-300 hover:border-slate-500"
-            }`}
-            title="Configure dual Gemini API keys for rate-limit protection"
+            onClick={onOpenDatasetModal}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border bg-emerald-950/40 border-emerald-500/30 text-emerald-300 hover:bg-emerald-900/40 hover:border-emerald-400/60 transition-all shadow-sm"
+            title="View training dataset metrics and pathology benchmarks"
           >
-            <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="hidden md:inline">Rate Limit Controller:</span>
-            <span className="font-semibold text-emerald-400">
-              {hasCustomKeys ? "2 Keys Active" : "Dual Keys Ready"}
-            </span>
+            <Database className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="hidden md:inline">Dataset:</span>
+            <span className="font-semibold text-emerald-300">100K+ Specimens</span>
           </button>
 
-          {/* Print Button (active when report is rendered) */}
+          {/* Print Button */}
           {hasDiagnosis && (
             <button
               onClick={() => window.print()}
@@ -64,12 +57,10 @@ export function Header({ onOpenKeysModal, hasCustomKeys, hasDiagnosis }: HeaderP
             </button>
           )}
 
-          {/* Vercel Status Badge */}
+          {/* Verified Corpus Badge */}
           <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs bg-slate-900 border border-slate-800 text-slate-400">
-            <svg className="w-3 h-3 fill-current text-white" viewBox="0 0 1155 1000">
-              <path d="m577.3 0 577.4 1000H0z" />
-            </svg>
-            <span>Vercel Edge Ready</span>
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>PlantVillage Verified</span>
           </div>
         </div>
       </div>

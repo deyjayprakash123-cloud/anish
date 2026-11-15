@@ -1,10 +1,10 @@
 export interface DiagnosisMetadata {
-  keyUsed: "GEMINI_API_KEY_1" | "GEMINI_API_KEY_2" | "CLIENT_KEY_1" | "CLIENT_KEY_2";
-  failoverOccurred: boolean;
-  failoverReason?: string;
-  modelUsed: string;
+  datasetCorpus: string;
+  confidenceMatch: string;
+  neuralModel: string;
   latencyMs: number;
   timestamp: string;
+  verificationStatus: string;
 }
 
 export interface ParsedSection {
@@ -28,9 +28,4 @@ export interface DiagnosisResult {
   };
   sections: ParsedSection[];
   metadata: DiagnosisMetadata;
-}
-
-export interface ApiKeysConfig {
-  key1: string;
-  key2: string;
 }

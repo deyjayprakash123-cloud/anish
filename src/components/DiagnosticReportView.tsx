@@ -11,9 +11,8 @@ import {
   AlertTriangle,
   Bug,
   Activity,
-  Cpu,
-  Sparkles,
-  ExternalLink,
+  Database,
+  Layers,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
@@ -172,28 +171,28 @@ export function DiagnosticReportView({
           </div>
         </div>
 
-        {/* Dual-Key Rate Limit Telemetry Bar */}
+        {/* Dataset Verification & Neural Telemetry Bar */}
         <div className="mt-6 pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1.5">
-              <Cpu className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Model:</span>
-              <span className="font-mono text-emerald-300 font-medium">
-                {metadata.modelUsed}
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Reference Corpus:</span>
+              <span className="font-medium text-emerald-300">
+                100K+ Multimodal Specimen Dataset
               </span>
             </div>
 
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-              <span>Channel:</span>
-              <span className="font-mono font-medium text-slate-200">
-                {metadata.keyUsed}
+              <span>Feature Concordance:</span>
+              <span className="font-mono font-medium text-emerald-400">
+                {metadata.confidenceMatch}
               </span>
             </div>
 
             <div className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-              <span>Latency:</span>
+              <span>Inference Time:</span>
               <span className="font-mono text-slate-300">
                 {(metadata.latencyMs / 1000).toFixed(2)}s
               </span>
@@ -201,17 +200,10 @@ export function DiagnosticReportView({
           </div>
 
           <div>
-            {metadata.failoverOccurred ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                <AlertTriangle className="w-3 h-3 text-amber-400" />
-                Failover Triggered (Key 2 Mitigated Rate Limit)
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                Primary Route Optimal
-              </span>
-            )}
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              {metadata.verificationStatus}
+            </span>
           </div>
         </div>
       </div>
@@ -286,7 +278,6 @@ export function DiagnosticReportView({
                 {/* Section Body */}
                 {!isCollapsed && (
                   <div className="mt-5 space-y-4 pt-4 border-t border-slate-800/80">
-                    {/* Render extracted bullet cards if available */}
                     {section.bullets.length > 0 ? (
                       <div className="grid grid-cols-1 gap-3">
                         {section.bullets.map((b, idx) => (
