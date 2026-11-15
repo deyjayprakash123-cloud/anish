@@ -62,6 +62,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Validate that at least one Gemini API key is configured
+    const hasKey = Boolean(
+      process.env.GEMINI_API_KEY_1 ||
+      process.env.GEMINI_API_KEY ||
+      process.env.GEMINI_API_KEY_2
+    );
+
+    if (!hasKey) {
+      return NextResponse.json(
+        {
+          error:
+            "No Gemini API key detected in Vercel environment. Please go to Vercel Project Settings → Environment Variables and add GEMINI_API_KEY_1.",
+        },
+        { status: 500 }
+      );
+    }
+
     // Initialize PlantScan Vision Engine
     const engine = new PlantScanVisionEngine();
 

@@ -59,10 +59,21 @@ export default function Home() {
         }),
       });
 
-      const data = await res.json();
+      const rawText = await res.text();
+      let data: any = null;
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        // Handle server non-JSON responses (e.g. Vercel HTML timeout or payload error)
+        throw new Error(
+          rawText.length > 250
+            ? `Server returned HTTP ${res.status} (${res.statusText || "Error"}). Please ensure image file is under 4MB.`
+            : rawText || `Server returned HTTP ${res.status}`
+        );
+      }
 
       if (!res.ok) {
-        throw new Error(data.error || `Analysis failed with status ${res.status}`);
+        throw new Error(data?.error || `Analysis failed with status ${res.status}`);
       }
 
       setDiagnosis(data);
