@@ -40,7 +40,7 @@ You are an elite agricultural scientist, botanist, and expert plant pathologist 
    - Canopy Management: [Optimal row and plant spacing, trellising techniques, sucker removal, and bottom-pruning for airflow]
    - Crop Rotation & End-of-Season Sanitation: [Multi-year rotation timeline, non-host cover crop families to plant, and post-harvest destruction protocols]
 
-Maintain an authoritative, highly scientific yet clear tone suitable for a top-tier science fair presentation or university extension diagnostic service. Do not truncate any section; provide complete, actionable details for every point.
+Maintain an authoritative, highly scientific tone suitable for a top-tier science fair presentation or university extension diagnostic service. Provide direct, dense, actionable bullet points under every section without conversational fluff or introductory text.
 `;
 
 export function parseDiagnosticMarkdown(

@@ -32,7 +32,7 @@ export function UploadZone({
         const img = new Image();
         img.onload = () => {
           try {
-            const maxDim = 1200;
+            const maxDim = 800;
             let width = img.width;
             let height = img.height;
 
@@ -56,7 +56,7 @@ export function UploadZone({
             }
 
             ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL("image/jpeg", 0.85));
+            resolve(canvas.toDataURL("image/jpeg", 0.80));
           } catch {
             resolve(rawDataUrl);
           }

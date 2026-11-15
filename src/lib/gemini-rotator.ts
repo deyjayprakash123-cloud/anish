@@ -164,9 +164,7 @@ export class PlantScanVisionEngine {
     const candidateModels = [
       preferredModel,
       "gemini-3.8-flash",
-      "gemini-3.5-flash",
       "gemini-2.5-flash",
-      "gemini-2.5-flash-lite",
     ];
 
     // Filter out duplicates and any retired models
@@ -204,7 +202,10 @@ export class PlantScanVisionEngine {
         generationConfig: {
           temperature: 0.2,
           topP: 0.95,
-          maxOutputTokens: 3500,
+          maxOutputTokens: 1600,
+          thinkingConfig: {
+            thinkingLevel: "LOW",
+          },
         },
       };
 
@@ -216,6 +217,7 @@ export class PlantScanVisionEngine {
             "x-goog-api-key": apiKey,
           },
           body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(8000), // 8-second abort ceiling to strictly respect Vercel limits
         });
 
         if (!res.ok) {
