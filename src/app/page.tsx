@@ -1,0 +1,250 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Header } from "@/components/Header";
+import { ApiKeyModal } from "@/components/ApiKeyModal";
+import { UploadZone } from "@/components/UploadZone";
+import { ScanningOverlay } from "@/components/ScanningOverlay";
+import { DiagnosticReportView } from "@/components/DiagnosticReportView";
+import { DiagnosisResult } from "@/types/diagnosis";
+import { SampleSpecimen } from "@/data/sample-specimens";
+import {
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  BookOpen,
+  AlertCircle,
+  FlaskConical,
+  Sprout,
+  Cpu,
+} from "lucide-react";
+
+export default function Home() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [diagnosis, setDiagnosis] = useState<DiagnosisResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isKeysModalOpen, setIsKeysModalOpen] = useState(false);
+  const [customKey1, setCustomKey1] = useState("");
+  const [customKey2, setCustomKey2] = useState("");
+
+  // Load custom keys from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const k1 = localStorage.getItem("phyto_gemini_key_1") || "";
+      const k2 = localStorage.getItem("phyto_gemini_key_2") || "";
+      setCustomKey1(k1);
+      setCustomKey2(k2);
+    }
+  }, []);
+
+  const handleImageSelected = (
+    base64: string,
+    previewUrl: string,
+    sampleInfo?: SampleSpecimen
+  ) => {
+    setSelectedImage(base64);
+    setError(null);
+  };
+
+  const handleClearImage = () => {
+    setSelectedImage(null);
+    setDiagnosis(null);
+    setError(null);
+  };
+
+  const handleRunDiagnosis = async () => {
+    if (!selectedImage) return;
+
+    setIsAnalyzing(true);
+    setError(null);
+    setDiagnosis(null);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (customKey1) headers["x-gemini-key-1"] = customKey1;
+      if (customKey2) headers["x-gemini-key-2"] = customKey2;
+
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          image: selectedImage,
+          key1: customKey1 || undefined,
+          key2: customKey2 || undefined,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || `Analysis failed with status ${res.status}`);
+      }
+
+      setDiagnosis(data);
+    } catch (err: any) {
+      console.error("Diagnosis error:", err);
+      setError(
+        err.message ||
+          "Failed to analyze specimen. Please verify your Gemini API key configuration or network connection."
+      );
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950">
+      {/* Top Navigation */}
+      <Header
+        onOpenKeysModal={() => setIsKeysModalOpen(true)}
+        hasCustomKeys={Boolean(customKey1 || customKey2)}
+        hasDiagnosis={Boolean(diagnosis)}
+      />
+
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-10">
+        {/* Error Alert */}
+        {error && (
+          <div className="glass-panel p-4 sm:p-5 rounded-2xl border border-rose-500/40 bg-rose-950/20 text-rose-200 flex items-start gap-3 animate-fadeIn">
+            <AlertCircle className="w-5 h-5 text-rose-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm space-y-1">
+              <strong className="font-semibold block text-white">Diagnostic Error:</strong>
+              <p>{error}</p>
+              <button
+                onClick={() => setIsKeysModalOpen(true)}
+                className="mt-2 text-xs font-semibold text-emerald-400 hover:underline flex items-center gap-1"
+              >
+                Configure Gemini API Keys &rarr;
+              </button>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-xs text-rose-400 hover:text-white"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
+
+        {/* Diagnosis Results Screen */}
+        {diagnosis && selectedImage ? (
+          <DiagnosticReportView
+            diagnosis={diagnosis}
+            imageSrc={selectedImage}
+            onReset={handleClearImage}
+          />
+        ) : isAnalyzing && selectedImage ? (
+          /* Live Scanning Animation */
+          <ScanningOverlay imageSrc={selectedImage} />
+        ) : (
+          /* Landing & Upload Screen */
+          <div className="space-y-10">
+            {/* Hero Section */}
+            <div className="text-center max-w-3xl mx-auto space-y-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-inner">
+                <FlaskConical className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Agricultural Pathology & Extension Laboratory</span>
+              </div>
+
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+                Foliar Disease Diagnostics Powered by{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-green-500">
+                  Gemini Vision
+                </span>
+              </h1>
+
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                Upload any crop or plant leaf specimen to generate an exhaustive, science-fair grade
+                8-tier pathology dossier with dual-API key rate limit protection.
+              </p>
+            </div>
+
+            {/* Architecture Highlights Pill Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="glass-panel p-4 rounded-2xl border border-slate-800/80 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                  <Zap className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Lightweight Vision
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Sub-second leaf analysis via gemini-2.5-flash with ultra-low token latency.
+                  </p>
+                </div>
+              </div>
+
+              <div className="glass-panel p-4 rounded-2xl border border-slate-800/80 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 flex-shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    Dual Key Controller
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Zero-drop 429 quota resilience with automatic round-robin & standby failover.
+                  </p>
+                </div>
+              </div>
+
+              <div className="glass-panel p-4 rounded-2xl border border-slate-800/80 flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">
+                  <BookOpen className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-white uppercase tracking-wider">
+                    8-Tier Pathology Dossier
+                  </h4>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Exact taxonomy, FRAC chemistry, biological antagonists & cultural hygiene.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Upload & Sample Testing Section */}
+            <UploadZone
+              onImageSelected={handleImageSelected}
+              selectedImage={selectedImage}
+              onClear={handleClearImage}
+              isAnalyzing={isAnalyzing}
+              onAnalyze={handleRunDiagnosis}
+            />
+          </div>
+        )}
+      </main>
+
+      {/* Dual Key Configuration Modal */}
+      <ApiKeyModal
+        isOpen={isKeysModalOpen}
+        onClose={() => setIsKeysModalOpen(false)}
+        onSaveKeys={(k1, k2) => {
+          setCustomKey1(k1);
+          setCustomKey2(k2);
+        }}
+      />
+
+      {/* Footer */}
+      <footer className="w-full border-t border-slate-800/80 bg-slate-950/60 py-6 mt-12 no-print">
+        <div className="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 space-y-2">
+          <p className="flex items-center justify-center gap-2">
+            <Sprout className="w-4 h-4 text-emerald-400" />
+            <span>
+              PhytoScan AI — Production Ready for Vercel Deployment & Science Fair Demonstrations
+            </span>
+          </p>
+          <p className="text-[11px] text-slate-400">
+            For academic, diagnostic, and agricultural extension purposes. Always follow pesticide
+            label safety and local agronomic regulations before chemical applications.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}
