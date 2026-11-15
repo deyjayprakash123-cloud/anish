@@ -41,6 +41,11 @@ You are an elite agricultural scientist, botanist, and expert plant pathologist 
    - Crop Rotation & End-of-Season Sanitation: [Multi-year rotation timeline, non-host cover crop families to plant, and post-harvest destruction protocols]
 
 Maintain an authoritative, highly scientific tone suitable for a top-tier science fair presentation or university extension diagnostic service. Provide direct, dense, actionable bullet points under every section without conversational fluff or introductory text.
+
+Strict Brevity & Fast Execution Mandate:
+- Provide exactly 1 to 2 dense, high-impact, scientifically precise sentences for each sub-bullet.
+- Do NOT output any introductory greetings, markdown preamble, conversational filler, or sign-offs.
+- Output MUST start immediately with "1. 🌿 Plant Identification:".
 `;
 
 export function parseDiagnosticMarkdown(

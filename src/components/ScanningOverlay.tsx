@@ -5,6 +5,7 @@ import { Activity, Database, Microscope, Scan } from "lucide-react";
 
 interface ScanningOverlayProps {
   imageSrc: string;
+  streamText?: string;
 }
 
 const SCAN_STAGES = [
@@ -15,7 +16,7 @@ const SCAN_STAGES = [
   { text: "Synthesizing exhaustive 8-tier agronomic pathology dossier...", delay: 10500 },
 ];
 
-export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
+export function ScanningOverlay({ imageSrc, streamText }: ScanningOverlayProps) {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
 
   useEffect(() => {
@@ -31,6 +32,22 @@ export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
       intervals.forEach((t) => clearTimeout(t));
     };
   }, []);
+
+  // Dynamically compute the active stage if streamText is present
+  let activeIndex = currentStageIndex;
+  if (streamText) {
+    if (streamText.includes("7. 🧪") || streamText.includes("8. 🚫")) {
+      activeIndex = 4;
+    } else if (streamText.includes("5. 🛡️") || streamText.includes("6. 🌱")) {
+      activeIndex = 3;
+    } else if (streamText.includes("3. 🦠") || streamText.includes("4. 🔍")) {
+      activeIndex = 2;
+    } else if (streamText.includes("1. 🌿") || streamText.includes("2. 🩺")) {
+      activeIndex = 1;
+    }
+  }
+
+  const activeText = SCAN_STAGES[activeIndex]?.text;
 
   return (
     <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-emerald-500/40 text-center space-y-6 animate-pulse-slow">
@@ -63,7 +80,7 @@ export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
         </div>
 
         <h3 className="text-base sm:text-lg font-bold text-white transition-all">
-          {SCAN_STAGES[currentStageIndex]?.text}
+          {activeText}
         </h3>
 
         {/* Stepper Dots */}
@@ -72,9 +89,9 @@ export function ScanningOverlay({ imageSrc }: ScanningOverlayProps) {
             <div
               key={idx}
               className={`h-1.5 rounded-full transition-all duration-500 ${
-                idx === currentStageIndex
+                idx === activeIndex
                   ? "w-8 bg-emerald-400"
-                  : idx < currentStageIndex
+                  : idx < activeIndex
                   ? "w-2 bg-emerald-700"
                   : "w-2 bg-slate-800"
               }`}

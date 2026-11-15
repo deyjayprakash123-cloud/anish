@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PlantScanVisionEngine } from "@/lib/gemini-rotator";
-import { PLANT_PATHOLOGY_PROMPT, parseDiagnosticMarkdown } from "@/lib/pathology-engine";
+import { PLANT_PATHOLOGY_PROMPT } from "@/lib/pathology-engine";
 
-export const maxDuration = 60; // 60 seconds max execution time for Vercel Serverless
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +62,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Validate that at least one Gemini API key is configured
     const hasKey = Boolean(
       process.env.GEMINI_API_KEY_1 ||
       process.env.GEMINI_API_KEY ||
@@ -82,15 +81,20 @@ export async function POST(req: NextRequest) {
     // Initialize PlantScan Vision Engine
     const engine = new PlantScanVisionEngine();
 
-    const { text, metadata } = await engine.analyzeImage(
+    // Stream analysis directly to bypass any Vercel execution timeouts
+    const { stream } = await engine.streamAnalysis(
       imageBase64,
       mimeType,
       PLANT_PATHOLOGY_PROMPT
     );
 
-    const parsedResult = parseDiagnosticMarkdown(text, metadata);
-
-    return NextResponse.json(parsedResult);
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        "X-Accel-Buffering": "no",
+      },
+    });
   } catch (error: any) {
     console.error("PlantScan Diagnostic Analysis Error:", error);
     return NextResponse.json(
@@ -108,6 +112,6 @@ export async function GET() {
     service: "PlantScan AI — Botanical Pathology & Extension Diagnostic System",
     dataset: "PlantVillage + CGIAR Agricultural Foliar Dataset (100,000+ Curated Specimens)",
     status: "Operational",
-    classes: "38 Agricultural Crop Species / 87 Phytopathological Conditions",
+    mode: "Real-Time Streaming Inference",
   });
 }
