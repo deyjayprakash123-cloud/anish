@@ -153,19 +153,31 @@ export class PlantScanVisionEngine {
     prompt: string
   ): Promise<{ text: string }> {
     let preferredModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-    // Sanitize any deprecated gemini-2.0 model references
-    if (preferredModel === "gemini-2.0-flash" || preferredModel.includes("2.0")) {
+    // Sanitize any deprecated gemini-2.0 or 1.5 model references
+    if (
+      preferredModel.includes("2.0") ||
+      preferredModel.includes("1.5")
+    ) {
       preferredModel = "gemini-3.8-flash";
     }
 
-    const modelsToTry = [
+    const candidateModels = [
       preferredModel,
       "gemini-3.8-flash",
-      "gemini-3.8-flash-lite",
+      "gemini-3.5-flash",
       "gemini-2.5-flash",
-      "gemini-1.5-flash",
+      "gemini-2.5-flash-lite",
     ];
-    const uniqueModels = Array.from(new Set(modelsToTry));
+
+    // Filter out duplicates and any retired models
+    const uniqueModels = Array.from(new Set(candidateModels)).filter(
+      (m) => !m.includes("2.0") && !m.includes("1.5")
+    );
+
+    let safeMimeType = mimeType || "image/jpeg";
+    if (safeMimeType.includes("svg")) {
+      safeMimeType = "image/jpeg";
+    }
 
     let lastHttpError: any = null;
 
@@ -182,7 +194,7 @@ export class PlantScanVisionEngine {
               },
               {
                 inline_data: {
-                  mime_type: mimeType,
+                  mime_type: safeMimeType,
                   data: imageBase64,
                 },
               },
@@ -201,6 +213,7 @@ export class PlantScanVisionEngine {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "x-goog-api-key": apiKey,
           },
           body: JSON.stringify(payload),
         });
@@ -212,21 +225,40 @@ export class PlantScanVisionEngine {
 
           const errObj: any = new Error(errorMsg);
           errObj.status = res.status;
+          errObj.details = errorJson;
 
-          // Propagate 429 immediately so outer rotator switches to secondary key
-          if (res.status === 429) throw errObj;
+          // 1. Quota / Rate limit (429) -> throw so outer rotator switches to secondary key
+          if (res.status === 429 || errorMsg.includes("RESOURCE_EXHAUSTED")) {
+            throw errObj;
+          }
 
-          // If model is discontinued (like gemini-2.0-flash), not found, or unsupported, try next model
-          const isModelUnavailable =
+          // 2. Authentication / Permission errors -> throw immediately, don't waste time trying other models with a bad key!
+          if (
+            res.status === 401 ||
+            res.status === 403 ||
+            errorMsg.toLowerCase().includes("api key") ||
+            errorMsg.toLowerCase().includes("permission")
+          ) {
+            throw errObj;
+          }
+
+          // 3. Payload / Image error -> throw immediately
+          if (
+            errorMsg.toLowerCase().includes("mime") ||
+            errorMsg.toLowerCase().includes("image")
+          ) {
+            throw errObj;
+          }
+
+          // 4. Model not found or deprecated on this endpoint -> try next candidate
+          const isModelNotFound =
             res.status === 404 ||
-            res.status === 400 ||
-            errorMsg.toLowerCase().includes("no longer available") ||
             errorMsg.toLowerCase().includes("not found") ||
-            errorMsg.toLowerCase().includes("deprecated") ||
-            errorMsg.toLowerCase().includes("unsupported");
+            errorMsg.toLowerCase().includes("no longer available") ||
+            errorMsg.toLowerCase().includes("not supported for generatecontent");
 
-          if (isModelUnavailable) {
-            console.warn(`Model '${model}' unavailable: ${errorMsg}. Falling back to next candidate...`);
+          if (isModelNotFound) {
+            console.warn(`Model '${model}' not supported on this endpoint (${errorMsg}). Trying next candidate...`);
             lastHttpError = errObj;
             continue;
           }

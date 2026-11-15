@@ -46,9 +46,33 @@ export function UploadZone({
     }
   };
 
-  const handleSampleClick = (sample: SampleSpecimen) => {
+  const rasterizeSvgToJpeg = (svgDataUrl: string): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const canvas = document.createElement("canvas");
+          canvas.width = 600;
+          canvas.height = 600;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) return resolve(svgDataUrl);
+          ctx.fillStyle = "#0f172a";
+          ctx.fillRect(0, 0, 600, 600);
+          ctx.drawImage(img, 0, 0, 600, 600);
+          resolve(canvas.toDataURL("image/jpeg", 0.95));
+        } catch {
+          resolve(svgDataUrl);
+        }
+      };
+      img.onerror = () => resolve(svgDataUrl);
+      img.src = svgDataUrl;
+    });
+  };
+
+  const handleSampleClick = async (sample: SampleSpecimen) => {
     setSelectedSample(sample);
-    onImageSelected(sample.previewSvg, sample.previewSvg, sample);
+    const rasterJpeg = await rasterizeSvgToJpeg(sample.previewSvg);
+    onImageSelected(rasterJpeg, rasterJpeg, sample);
   };
 
   return (

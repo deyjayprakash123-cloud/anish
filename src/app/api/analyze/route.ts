@@ -44,6 +44,10 @@ export async function POST(req: NextRequest) {
         imageBase64 = body.image;
         if (body.mimeType) mimeType = body.mimeType;
       }
+
+      if (!mimeType || mimeType.includes("svg")) {
+        mimeType = "image/jpeg";
+      }
     } else {
       return NextResponse.json(
         { error: "Unsupported Content-Type. Please use multipart/form-data or application/json." },
