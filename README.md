@@ -60,7 +60,7 @@ Add your Gemini API keys for the backend serverless engine:
 ```env
 GEMINI_API_KEY_1=AIzaSyYourPrimaryKeyHere
 GEMINI_API_KEY_2=AIzaSyYourSecondaryKeyHere
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
 ### 3. Run Development Server
@@ -87,7 +87,7 @@ vercel
 3. Under **Environment Variables**, add:
    - `GEMINI_API_KEY_1`
    - `GEMINI_API_KEY_2`
-   - `GEMINI_MODEL` = `gemini-2.5-flash`
+   - `GEMINI_MODEL` = `gemini-3.8-flash`
 4. Click **Deploy**. Vercel will build and serve your Next.js application globally with edge caching and serverless execution!
 
 ---

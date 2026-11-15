@@ -152,10 +152,18 @@ export class PlantScanVisionEngine {
     mimeType: string,
     prompt: string
   ): Promise<{ text: string }> {
+    let preferredModel = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    // Sanitize any deprecated gemini-2.0 model references
+    if (preferredModel === "gemini-2.0-flash" || preferredModel.includes("2.0")) {
+      preferredModel = "gemini-3.8-flash";
+    }
+
     const modelsToTry = [
-      process.env.GEMINI_MODEL || "gemini-2.5-flash",
+      preferredModel,
+      "gemini-3.8-flash",
+      "gemini-3.8-flash-lite",
+      "gemini-2.5-flash",
       "gemini-1.5-flash",
-      "gemini-2.0-flash",
     ];
     const uniqueModels = Array.from(new Set(modelsToTry));
 
@@ -205,11 +213,24 @@ export class PlantScanVisionEngine {
           const errObj: any = new Error(errorMsg);
           errObj.status = res.status;
 
+          // Propagate 429 immediately so outer rotator switches to secondary key
           if (res.status === 429) throw errObj;
-          if (res.status === 404) {
+
+          // If model is discontinued (like gemini-2.0-flash), not found, or unsupported, try next model
+          const isModelUnavailable =
+            res.status === 404 ||
+            res.status === 400 ||
+            errorMsg.toLowerCase().includes("no longer available") ||
+            errorMsg.toLowerCase().includes("not found") ||
+            errorMsg.toLowerCase().includes("deprecated") ||
+            errorMsg.toLowerCase().includes("unsupported");
+
+          if (isModelUnavailable) {
+            console.warn(`Model '${model}' unavailable: ${errorMsg}. Falling back to next candidate...`);
             lastHttpError = errObj;
             continue;
           }
+
           throw errObj;
         }
 
