@@ -26,7 +26,7 @@ export class PlantScanVisionEngine {
         provider: isGroq ? "groq" : "gemini",
         key: customKey.trim(),
         model: isGroq
-          ? process.env.GROQ_MODEL || "openai/gpt-oss-120b"
+          ? process.env.GROQ_MODEL || "qwen/qwen3.8-27b"
           : process.env.GEMINI_MODEL || "gemini-3.8-flash",
         failureCount: 0,
         successCount: 0,
@@ -36,7 +36,7 @@ export class PlantScanVisionEngine {
     // 1. Groq API Keys (Primary fast inference provider)
     const groqKey1 = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_1;
     const groqKey2 = process.env.GROQ_API_KEY_2;
-    const groqModel = process.env.GROQ_MODEL || "openai/gpt-oss-120b";
+    const groqModel = process.env.GROQ_MODEL || "qwen/qwen3.8-27b";
 
     if (groqKey1 && groqKey1.trim()) {
       this.slots.push({
@@ -211,11 +211,10 @@ export class PlantScanVisionEngine {
     const groqUrl = "https://api.groq.com/openai/v1/chat/completions";
 
     // Candidate models on Groq:
-    // If user specified openai/gpt-oss-120b (text model), we try vision models (qwen/qwen3.8-27b)
-    // to guarantee images are parsed without 400 errors.
+    // Strictly prioritize qwen/qwen3.8-27b (Groq's premier multimodal vision model)
     const candidateModels = [
-      requestedModel,
       "qwen/qwen3.8-27b",
+      requestedModel,
       "meta-models/muse-spark-open",
       "llama-3.2-11b-vision-preview",
     ];
@@ -224,7 +223,7 @@ export class PlantScanVisionEngine {
     let lastError: any = null;
 
     for (const targetModel of uniqueModels) {
-      const payload = {
+      const payload: any = {
         model: targetModel,
         messages: [
           {
@@ -243,10 +242,15 @@ export class PlantScanVisionEngine {
             ],
           },
         ],
-        temperature: 0.2,
+        temperature: 0.6,
+        top_p: 0.95,
         max_completion_tokens: 2048,
         stream: true,
       };
+
+      if (targetModel.includes("qwen")) {
+        payload.reasoning_effort = "default";
+      }
 
       try {
         const res = await fetch(groqUrl, {
