@@ -63,6 +63,9 @@ export async function POST(req: NextRequest) {
     }
 
     const hasKey = Boolean(
+      process.env.GROQ_API_KEY ||
+      process.env.GROQ_API_KEY_1 ||
+      process.env.GROQ_API_KEY_2 ||
       process.env.GEMINI_API_KEY_1 ||
       process.env.GEMINI_API_KEY ||
       process.env.GEMINI_API_KEY_2
@@ -72,7 +75,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "No Gemini API key detected in Vercel environment. Please go to Vercel Project Settings → Environment Variables and add GEMINI_API_KEY_1.",
+            "No API key detected in Vercel environment. Please go to Vercel Project Settings → Environment Variables and add GROQ_API_KEY (from https://console.groq.com/keys) or GEMINI_API_KEY_1.",
         },
         { status: 500 }
       );

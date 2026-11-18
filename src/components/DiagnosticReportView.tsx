@@ -15,6 +15,9 @@ import {
   Layers,
   ChevronDown,
   ChevronUp,
+  HeartPulse,
+  Sprout,
+  FlaskConical,
 } from "lucide-react";
 import { DiagnosisResult } from "@/types/diagnosis";
 
@@ -207,6 +210,58 @@ export function DiagnosticReportView({
           </div>
         </div>
       </div>
+
+      {/* Targeted Disease Cure & Treatment Plan Box */}
+      {summary.healthStatus !== "Healthy" && (
+        <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-emerald-500/40 bg-gradient-to-br from-emerald-950/30 via-slate-900/60 to-teal-950/20 shadow-xl space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+                <HeartPulse className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <span>Targeted Cure & Disease Eradication Plan</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
+                    Action Required
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-400">
+                  Step-by-step organic remedies, biological antagonists, and chemical interventions to restore foliar health.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            {/* Organic Cure Summary */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-emerald-500/20 space-y-2">
+              <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                <Sprout className="w-4 h-4 text-emerald-400" />
+                <span>🌱 Organic & Bio-Fungicide Cure</span>
+              </div>
+              <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                <li><strong className="text-white">Emergency Pruning:</strong> Cut infected leaves 2 inches below lesion with 70% alcohol sanitized shears. Destroy immediately.</li>
+                <li><strong className="text-white">Botanical Spray:</strong> Emulsify cold-pressed Neem Oil (5ml/L + 2ml mild soap) or Potassium Bicarbonate (3g/L) every 7 days.</li>
+                <li><strong className="text-white">Bio-Antagonist:</strong> Apply <span className="italic text-emerald-300">Bacillus subtilis</span> or <span className="italic text-emerald-300">Trichoderma harzianum</span> to halt mycelial spread.</li>
+              </ul>
+            </div>
+
+            {/* Chemical Treatment Summary */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-teal-500/20 space-y-2">
+              <div className="flex items-center gap-2 text-teal-400 text-xs font-bold uppercase tracking-wider">
+                <FlaskConical className="w-4 h-4 text-teal-400" />
+                <span>🧪 Curative Chemical Treatment</span>
+              </div>
+              <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                <li><strong className="text-white">Contact Surface Kill:</strong> Apply Copper Hydroxide (2.5g/L) or Mancozeb (2g/L) to prevent surface spore germination.</li>
+                <li><strong className="text-white">Systemic Tissue Cure:</strong> Apply curative triazole (e.g. Difenoconazole) or strobilurin (Azoxystrobin) for internal eradication.</li>
+                <li><strong className="text-white">Resistance Safety:</strong> Rotate FRAC groups every 10–14 days and respect Pre-Harvest Intervals (PHI).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View Switcher (Structured Visual Dossier vs Raw Research Markdown) */}
       <div className="flex items-center justify-between no-print">

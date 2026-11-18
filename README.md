@@ -56,8 +56,14 @@ Copy `.env.example` to `.env.local`:
 ```bash
 cp .env.example .env.local
 ```
-Add your Gemini API keys for the backend serverless engine:
+Add your **Groq API key** (obtain free from [console.groq.com/keys](https://console.groq.com/keys)) or Gemini API keys:
 ```env
+# GroqCloud LPU Inference (Primary ultra-fast engine)
+GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_API_KEY_2=gsk_optional_secondary_failover_key
+GROQ_MODEL=openai/gpt-oss-120b
+
+# Google Gemini API Keys (Fallback)
 GEMINI_API_KEY_1=AIzaSyYourPrimaryKeyHere
 GEMINI_API_KEY_2=AIzaSyYourSecondaryKeyHere
 GEMINI_MODEL=gemini-3.8-flash
@@ -85,9 +91,9 @@ vercel
 1. Navigate to [vercel.com/new](https://vercel.com/new).
 2. Select your repository: **`deyjayprakash123-cloud/anish`**.
 3. Under **Environment Variables**, add:
-   - `GEMINI_API_KEY_1`
-   - `GEMINI_API_KEY_2`
-   - `GEMINI_MODEL` = `gemini-3.8-flash`
+   - `GROQ_API_KEY` = your Groq API key (starts with `gsk_`)
+   - `GROQ_MODEL` = `openai/gpt-oss-120b` *(Optional, defaults to high-speed multimodal vision)*
+   - `GEMINI_API_KEY_1` = *(Optional Gemini fallback)*
 4. Click **Deploy**. Vercel will build and serve your Next.js application globally with edge caching and serverless execution!
 
 ---
